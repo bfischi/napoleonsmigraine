@@ -15,7 +15,7 @@ print('Retrieving', url)
 # file.write(content)
 # file.close()
 
-# process the barometric data text file
+# process the barometric data text file if url not being used
 barreadings = open('barometer.txt', 'r')
 readings = barreadings.readlines()
 
@@ -59,55 +59,47 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Battles
 
 
 for line in linelist:
+    print('which line are we on?: ', line)
     r = 1
-    m = 1
-
     # extract lat & long from GRID-POINT lines
     if line.find('GRID-POINT') != -1:
         barlat = line[38:42]
         barlong = line[43:47]
-        m = 1
+        r = 1
         print('Barlat, barlong:', barlat, barlong)
+
     # process line and remove unneeded mean value for year (last item in list)
     else:
         pieces = line.strip(' ')
         pieces = pieces.split(' ')
         pieces.pop(-1)
-        print('Pieces list:', pieces)
+        pieces = filter(None, pieces)
+        #print('Pieces list:', pieces)
+
         newbarlist = list()
         for piece in pieces:
             if piece.find('/'):
                 head, sep, tail = piece.partition('/')
                 newbarlist.append(head)
         print('Newbarlist:', newbarlist)
+        if newbarlist == []: break
 
-        # extract data from processed line
         readingdict = dict(zip(('jan_read', 'feb_read', 'mar_read', 'apr_read', 'may_read',
                                 'jun_read', 'jul_read', 'aug_read', 'sep_read', 'oct_read',
-                                'nov_read', 'dec_read'), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)))
+                                'nov_read', 'dec_read'), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                          0.0, 0.0, 0.0, 0.0, 0.0)))
 
-        # substitute values in dict with monthly readings
-        # for i in range(1,13):
-        #     if r < 13:
-        #         monthlyread = newbarlist[r]
-        #         print('monthlyread var:', monthlyread)
-        #         readingdict[m] = monthlyread
-        #         r = r + 1
-        #     else: continue
-        #     m = m + 1
-
+        # extract data from processed line
         for k, v in readingdict.items():
-            if r < 13:
+            #print('r value:', r)
+            if r < 12:
                 monthlyread = newbarlist[r]
-                print('monthlyread var:', monthlyread)
-                readingdict[k] = monthlyread
+                readingdict[k] = float(monthlyread)
                 r = r + 1
-            else:
-                continue
-            m = m + 1
+            else: break
 
         year = newbarlist[0]
-        readingdict['year'] = year
+        readingdict['year'] = int(year)
 
         print('Year', year)
         print('length of newbarlist:', len(newbarlist))
@@ -122,7 +114,6 @@ for line in linelist:
     # (year, jan_read, feb_read, mar_read, apr_read,
     # may_read, jun_read, jul_read, aug_read, sep_read, oct_read, nov_read, dec_read))
     # conn.commit()
-# print(linelist)
 
 
 cur.close()

@@ -1,12 +1,13 @@
 import sqlite3
 import ssl
+from operator import itemgetter
 import urllib.request, urllib.parse, urllib.error
 
 url = "https://cdiac.ess-dive.lbl.gov/ftp/ndp025/ndp025.eur"
 print('Retrieving', url)
 
-# # open and read the data at the url, store as text file
-# # for further processing
+# open and read the data at the url, store as text file
+# for further processing
 # page = urllib.request.urlopen(url)
 # file = open('barometer.txt', 'w')
 # content = str(page.read())
@@ -22,7 +23,6 @@ readings = barreadings.readlines()
 linelist = list()
 for lines in readings:
     linelist = lines.split('\\n')
-# print(linelist)
 
 # Ignore SSL certificate errors
 ctx = ssl.create_default_context()
@@ -56,11 +56,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     outcome INTEGER, batlat TEXT, batlong TEXT, stations_id INTEGER)''')
 
 # process strings and put into db
-
-
 for line in linelist:
-    print('''
-Which line are we on?: ''', line)
     r = 0
     # extract lat & long from GRID-POINT lines
     if line.find('GRID-POINT') != -1:
@@ -68,6 +64,8 @@ Which line are we on?: ''', line)
         barlong = line[43:47]
         r = 0
         print('Barlat, barlong:', barlat, barlong)
+        # commit lat and long to db
+        cur.execute('''INSERT OR IGNORE INTO Stations (barlat, barlong) VALUES (?, ?)''', (barlat, barlong))
 
     # process line and remove unneeded mean value for year (last item in list)
     else:
@@ -84,40 +82,28 @@ Which line are we on?: ''', line)
         print('Newbarlist:', newbarlist)
         if newbarlist == []: break
 
-        readingslist = list(map(list, zip(['year', 'jan_read', 'feb_read', 'mar_read', 'apr_read', 'may_read',
-                                'jun_read', 'jul_read', 'aug_read', 'sep_read', 'oct_read',
-                                'nov_read', 'dec_read', 'year'], [0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                                          0.0, 0.0, 0.0, 0.0])))
-        print('Initial readings list: ', readingslist)
-        # extract data from processed line
-        for item in readingslist:
-            #print('r value:', r)
-            if r == 0:
-                year = newbarlist[0]
-                readingslist[0][1] = int(year)
-                r = r + 1
-            elif 1 <= r < 12:
-                monthlyread = newbarlist[r]
-                readingslist[r][1] = monthlyread
-                r = r + 1
-            else:
-                monthlyread = newbarlist[r]
-                readingslist[r][1] = monthlyread
-                break
+        # Assign list items to vars to prepare for insertion into db
+        year = int(newbarlist[0])
+        jan_read = newbarlist[1]
+        feb_read = newbarlist[2]
+        mar_read = newbarlist[3]
+        apr_read = newbarlist[4]
+        may_read = newbarlist[5]
+        jun_read = newbarlist[6]
+        jul_read = newbarlist[7]
+        aug_read = newbarlist[8]
+        sep_read = newbarlist[9]
+        oct_read = newbarlist[10]
+        nov_read = newbarlist[11]
+        dec_read = newbarlist[12]
 
-        #print('Year', year)
-        print('length of newbarlist:', len(newbarlist))
-        print('readingslist:', readingslist)
-        print('Last val - newbarlist[r]', newbarlist[r])
-
-    # cur.execute('INSERT OR IGNORE INTO Stations (barlat, barlong) VALUES (?, ?)', (barlat, barlong))
-    # cur.execute('INSERT OR IGNORE INTO Barometer (jan_read, feb_read, mar_read, apr_read, may_read, jun_read, jul_read, '
-    #             'aug_read, sep_read, oct_read, nov_read, dec_read, year) '
-    #             'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    #             (jan_read, feb_read, mar_read, apr_read, may_read,
-    #              jun_read, jul_read, aug_read, sep_read, oct_read,
-    #              nov_read, dec_read, year))
-    #
-    # conn.commit()
+        # Insert items from readingslist into the DB
+        cur.execute('''INSERT OR IGNORE INTO Barometer (year, jan_read, feb_read, mar_read,
+                    apr_read, may_read, jun_read, jul_read, aug_read, sep_read, oct_read,
+                    nov_read, dec_read)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (year, jan_read, feb_read, mar_read,
+                    apr_read, may_read, jun_read, jul_read, aug_read, sep_read, oct_read,
+                    nov_read, dec_read))
+        conn.commit()
 
 cur.close()

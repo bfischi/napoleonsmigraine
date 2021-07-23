@@ -34,77 +34,76 @@ ctx.verify_mode = ssl.CERT_NONE
 
 conn = sqlite3.connect('barometer.sqlite')
 cur = conn.cursor()
-#
-# cur.execute('''DROP TABLE IF EXISTS Station ''')
-# cur.execute('''DROP TABLE IF EXISTS Barometer ''')
-# cur.execute('''DROP TABLE IF EXISTS Battle ''')
-#
-# # reading the reconstructed barometric data from CDAIC for that year, lat, long
-# cur.execute('''CREATE TABLE IF NOT EXISTS Station
-#     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, barlat TEXT, barlong TEXT)''')
-#
-# cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
-#     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, year INTEGER,
-#     jan REAL, feb REAL, mar REAL, apr REAL, may REAL, jun REAL,
-#     jul REAL, aug REAL, sep REAL, oct_m REAL, nov REAL, dec REAL,
-#     station_id INTEGER)''')
-#
-# cur.execute('''CREATE TABLE IF NOT EXISTS Battles
-#     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, start_year INTEGER,
-#     start_month INTEGER, start_day INTEGER, end_year INTEGER,
-#     end_month INTEGER, end_day INTEGER, battle_name TEXT,
-#     outcome INTEGER, batlat TEXT, batlong TEXT, station_id INTEGER)''')
-#
-# # process strings and put into db
-# for line in linelist:
-#     r = 0
-#     # extract lat & long from GRID-POINT lines
-#     if line.find('GRID-POINT') != -1:
-#         barlat = line[38:42]
-#         barlong = line[43:47]
-#         r = 0
-#         print('Barlat, barlong:', barlat, barlong)
-#         # commit lat and long to db
-#         cur.execute('''INSERT OR IGNORE INTO Station (barlat, barlong) VALUES (?, ?)''', (barlat, barlong))
-#         cur.execute('SELECT id FROM Station WHERE (barlat, barlong) = (?, ?) ', (barlat, barlong))
-#         station_id = cur.fetchone()[0]
-#
-#     # process line and remove unneeded mean value for year (last item in list)
-#     else:
-#         pieces = line.strip(' ')
-#         pieces = pieces.split(' ')
-#         pieces.pop(-1)
-#         pieces = filter(None, pieces)
-#
-#         newbarlist = list()
-#         for piece in pieces:
-#             if piece.find('/'):
-#                 head, sep, tail = piece.partition('/')
-#                 newbarlist.append(float(head))
-#         print('Newbarlist:', newbarlist)
-#         if newbarlist == []: break
-#
-#         # Assign list items to vars to prepare for insertion into db
-#         year = int(newbarlist[0])
-#         jan = newbarlist[1]
-#         feb = newbarlist[2]
-#         mar = newbarlist[3]
-#         apr = newbarlist[4]
-#         may = newbarlist[5]
-#         jun = newbarlist[6]
-#         jul = newbarlist[7]
-#         aug = newbarlist[8]
-#         sep = newbarlist[9]
-#         oct_m = newbarlist[10]
-#         nov = newbarlist[11]
-#         dec = newbarlist[12]
-#
-#         # Insert items from readingslist into the DB
-#         cur.execute('''INSERT OR IGNORE INTO Barometer (year, jan, feb, mar,
-#                     apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id)
-#                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-#                     (year, jan, feb, mar, apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id))
-#         conn.commit()
+
+cur.execute('''DROP TABLE IF EXISTS Station ''')
+cur.execute('''DROP TABLE IF EXISTS Barometer ''')
+cur.execute('''DROP TABLE IF EXISTS Battle ''')
+
+# reading the reconstructed barometric data from CDAIC for that year, lat, long
+cur.execute('''CREATE TABLE IF NOT EXISTS Station
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, barlat TEXT, barlong TEXT)''')
+
+cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, year INTEGER,
+    jan REAL, feb REAL, mar REAL, apr REAL, may REAL, jun REAL,
+    jul REAL, aug REAL, sep REAL, oct_m REAL, nov REAL, dec REAL,
+    station_id INTEGER)''')
+
+cur.execute('''CREATE TABLE IF NOT EXISTS Battles
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, battle_date1 TEXT,
+    battle_date2 TEXT, battle_name TEXT, outcome INTEGER, 
+    batlat TEXT, batlong TEXT, station_id INTEGER)''')
+
+# process strings and put into db
+for line in linelist:
+    r = 0
+    # extract lat & long from GRID-POINT lines
+    if line.find('GRID-POINT') != -1:
+        barlat = line[38:42]
+        barlong = line[43:47]
+        r = 0
+        print('Barlat, barlong:', barlat, barlong)
+        # commit lat and long to db
+        cur.execute('''INSERT OR IGNORE INTO Station (barlat, barlong) VALUES (?, ?)''', (barlat, barlong))
+        cur.execute('SELECT id FROM Station WHERE (barlat, barlong) = (?, ?) ', (barlat, barlong))
+        station_id = cur.fetchone()[0]
+
+    # process line and remove unneeded mean value for year (last item in list)
+    else:
+        pieces = line.strip(' ')
+        pieces = pieces.split(' ')
+        pieces.pop(-1)
+        pieces = filter(None, pieces)
+
+        newbarlist = list()
+        for piece in pieces:
+            if piece.find('/'):
+                head, sep, tail = piece.partition('/')
+                newbarlist.append(float(head))
+        print('Newbarlist:', newbarlist)
+        if newbarlist == []: break
+
+        # Assign list items to vars to prepare for insertion into db
+        year = int(newbarlist[0])
+        jan = newbarlist[1]
+        feb = newbarlist[2]
+        mar = newbarlist[3]
+        apr = newbarlist[4]
+        may = newbarlist[5]
+        jun = newbarlist[6]
+        jul = newbarlist[7]
+        aug = newbarlist[8]
+        sep = newbarlist[9]
+        oct_m = newbarlist[10]
+        nov = newbarlist[11]
+        dec = newbarlist[12]
+
+        # Insert items from readingslist into the DB
+        cur.execute('''INSERT OR IGNORE INTO Barometer (year, jan, feb, mar,
+                    apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (year, jan, feb, mar, apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id))
+        conn.commit()
 
 
 
@@ -150,6 +149,7 @@ with open('battles.txt', 'w') as fo:
 
             for item in battle_split:
                 # Handle battle dates formatted like dd-dd Mon yyyy or dd Mon yyyy
+                # Note: (1111, 1, 1) indicates that the date() for this entry is irrelevant
                 if len(battle_split) == 1:
                     # Where battle_split looks like ['30'] as in 30 April, e.g.
                     try:
@@ -210,4 +210,12 @@ with open('battles.txt', 'w') as fo:
 
             print(battle_date, battle_name, outcome,
                   'Battle Dates:', battle_date1, battle_date2)
+
+            # TODO break down battle dates next
+            cur.execute('''INSERT OR IGNORE INTO Battles (battle_date1, battle_date2, 
+                        battle_name, outcome)
+                        VALUES (?, ?, ?, ?)''',
+                        (battle_date1, battle_date2, battle_name, outcome))
+            conn.commit()
+
 cur.close()

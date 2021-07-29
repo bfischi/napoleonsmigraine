@@ -33,7 +33,7 @@ def haversine(lat1, long1, lat2, long2):
 conn = sqlite3.connect('barometer.sqlite')
 cur = conn.cursor()
 
-cur.execute('SELECT batlat, batlong FROM Battles')
+cur.execute('SELECT batlat, batlong, id FROM Battles')
 battle_loc = cur.fetchall()
 print(battle_loc, 'length:', len(battle_loc))
 
@@ -45,6 +45,7 @@ barlocs = list()
 for battle in battle_loc:
     batlat = battle[0]
     batlong = battle[1]
+    bat_id = battle[2]
     lowest_so_far = None
     # bar_id is used to track the barometric station id from the Station table
     bar_id = -1
@@ -69,5 +70,10 @@ for battle in battle_loc:
             else:
                 continue
     barlocs.append((lowest_so_far, bar_id))
+    cur.execute('''UPDATE Battles SET (station_id) = (?) 
+                   WHERE (id) = (?)''', (bar_id, bat_id))
+    conn.commit()
 
 print('Kilometers:', barlocs, len(barlocs))
+
+cur.close()

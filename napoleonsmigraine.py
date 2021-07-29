@@ -4,6 +4,21 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import datetime as dt
 
+def dmstodd(dms_string):
+    '''
+    Returns an integer converted from Degree Minutes Seconds (DMS) format to Decimal Degrees (DD).
+    DD is the format used in geolocation calculations and haversine.py.
+    Important: This formula is specific to the purpose used in this program only. It is not for
+    more standard degree-minute-second calculations.
+
+    :param dms_string: a string in DMS format  similar to "degrees(N/S/E/W)" - for example: 70N or 20W
+    :return: int
+    '''
+
+    dd_string = dms_string.strip('N').strip('S').strip('E').strip('W')
+    dd_string = int(dd_string)
+    return dd_string
+
 # Pull reconstructed barometric data for time period from CDIAC site
 #
 url = "https://cdiac.ess-dive.lbl.gov/ftp/ndp025/ndp025.eur"
@@ -39,9 +54,9 @@ cur.execute('''DROP TABLE IF EXISTS Station ''')
 cur.execute('''DROP TABLE IF EXISTS Barometer ''')
 cur.execute('''DROP TABLE IF EXISTS Battles ''')
 
-# reading the reconstructed barometric data from CDAIC for that year, lat, long
+# Create fresh tables in barometer.sqlite
 cur.execute('''CREATE TABLE IF NOT EXISTS Station
-    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, barlat TEXT, barlong TEXT)''')
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, barlat INTEGER, barlong INTEGER)''')
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, year INTEGER,
@@ -52,7 +67,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
 cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, battle_date1 TEXT,
     battle_date2 TEXT, battle_url TEXT, outcome TEXT,
-    batlat TEXT, batlong TEXT, station_id INTEGER)''')
+    batlat REAL, batlong REAL, station_id INTEGER)''')
 
 # Process barometric lat, long, and readings from CDAIC page and put into Station, Barometer tables
 for line in linelist:
@@ -61,9 +76,12 @@ for line in linelist:
     if line.find('GRID-POINT') != -1:
         barlat = line[38:42]
         barlong = line[43:47]
+        # convert lat and long into DD format
+        barlat = dmstodd(barlat)
+        barlong = dmstodd(barlong)
         r = 0
         print('Barlat, barlong:', barlat, barlong)
-        # commit lat and long to db
+        # commit lat and long to db as integers
         cur.execute('''INSERT OR IGNORE INTO Station (barlat, barlong) VALUES (?, ?)''', (barlat, barlong))
         cur.execute('SELECT id FROM Station WHERE (barlat, barlong) = (?, ?) ', (barlat, barlong))
         station_id = cur.fetchone()[0]
@@ -203,31 +221,38 @@ for tr in table.find_all('tr'):
                 (battle_date1, battle_date2, battle_url, outcome))
     conn.commit()
 
-# cur.execute('''SELECT battle_name FROM Battles''')
-# battle_names = [item[0] for item in cur.fetchall()]
-# print(battle_names)
-#
-# urlstub = "https://en.wikipedia.org"
-# for i in range(len(battle_names)):
-#     try:
-#         battlelocurl = urlstub + battle_names[i]
-#         print(battlelocurl)
-#         html_batloc = urllib.request.urlopen(battlelocurl, context=ctx).read()
-#         souploc = BeautifulSoup(html_batloc, 'html.parser')
-#         batlat = souploc.find('span', class_='latitude').get_text()
-#         batlong = souploc.find('span', class_='longitude').get_text()
-#         print('Battle name, latitude, longitude: ', battle_name, batlat, batlong)
-#
-#     except:
-#         print("Page or lat/long not found.")
-#         batlat = None
-#         batlong = None
-#         continue
-#
-#     # Insert data into DB
-#     cur.execute('''INSERT OR IGNORE INTO Battles (batlat, batlong)
-#                 VALUES (?, ?)''',
-#                 (batlat, batlong))
-#     conn.commit()
+cur.execute('''SELECT battle_url FROM Battles''')
+battle_names = [item[0] for item in cur.fetchall()]
+print(battle_names)
+
+for battle in battle_names:
+    try:
+        battle_url = battle
+        battle = urllib.parse.quote(battle, safe=':/')
+        html_batloc = urllib.request.urlopen(battle, context=ctx).read()
+        souploc = BeautifulSoup(html_batloc, 'html.parser')
+        # Grab Decimal Degree (DD) location from wikipedia page, used in haversine.py
+        dm_geo = souploc.find(class_='geo').get_text()
+        dm_geo = dm_geo.split(";")
+        batlat = dm_geo[0].strip()
+        batlong = dm_geo[1].strip()
+        # To grab DMS (Degree Minute Second data) data - not needed
+        # batlat = souploc.find(class_='latitude').get_text()
+        # batlong = souploc.find(class_='longitude').get_text()
+        print('Battle name, latitude, longitude: ', battle, batlat, batlong)
+
+        # Insert data into DB
+        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?) 
+                       WHERE (battle_url) = (?)''', (batlat, batlong, battle_url))
+        conn.commit()
+    except:
+        print("Page or lat/long not found.")
+        batlat = None
+        batlong = None
+        # Insert data into DB
+        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?) 
+                       WHERE (battle_url) = (?)''', (batlat, batlong, battle_url))
+        conn.commit()
+        continue
 
 cur.close()

@@ -1,6 +1,7 @@
 from math import radians, cos, sin, asin, sqrt
 import sqlite3
 
+
 def haversine(lat1, long1, lat2, long2):
     """
     Returns the great-circle distance in km between
@@ -29,6 +30,7 @@ def haversine(lat1, long1, lat2, long2):
         return km
     except:
         return False  # handle Nulls in lat/long lists
+
 
 conn = sqlite3.connect('barometer.sqlite')
 cur = conn.cursor()
@@ -75,5 +77,10 @@ for battle in battle_loc:
     conn.commit()
 
 print('Kilometers:', barlocs, len(barlocs))
+
+# Remove rows where there's no battle data
+# TODO: Should this be done sooner, in napoleonsmigraine.py?
+cur.execute('DELETE FROM Battles WHERE station_id = -1')
+conn.commit()
 
 cur.close()

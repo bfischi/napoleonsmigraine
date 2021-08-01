@@ -4,12 +4,14 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import datetime as dt
 
+
 def dmstodd(dms_string):
     '''
     Returns an integer converted from Degree Minutes Seconds (DMS) format to Decimal Degrees (DD).
     DD is the format used in geolocation calculations and haversine.py.
-    Important: This formula is specific to the purpose used in this program only. It is not for
-    more standard degree-minute-second calculations.
+    Important: This simple formula is specific to the purpose used in this program only. It is not for
+    more standard degree-minute-second calculations and doesn't handle Minute and Second
+    conversions.
 
     :param dms_string: a string in DMS format  similar to "degrees(N/S/E/W)" - for example: 70N or 20W
     :return: int
@@ -19,8 +21,8 @@ def dmstodd(dms_string):
     dd_string = int(dd_string)
     return dd_string
 
+
 # Pull reconstructed barometric data for time period from CDIAC site
-#
 url = "https://cdiac.ess-dive.lbl.gov/ftp/ndp025/ndp025.eur"
 print('Retrieving', url)
 
@@ -62,16 +64,25 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, year INTEGER,
     jan REAL, feb REAL, mar REAL, apr REAL, may REAL, jun REAL,
     jul REAL, aug REAL, sep REAL, oct_m REAL, nov REAL, dec REAL,
-    station_id INTEGER)''')
-#
+    station_id INTEGER, CONSTRAINT fk_station FOREIGN KEY (station_id) REFERENCES Station (id))''')
+
+# TODO: Battles.station_id might be a confusing name. It is actually the id
+# TODO: of the closest barometric station to the Battle, not the Station.id itself.
+# TODO: But how to change?
+
 cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, battle_date1 TEXT,
-    battle_date2 TEXT, battle_url TEXT, outcome TEXT,
+    battle_date2 TEXT, battle_url TEXT, battlename TEXT, outcome INTEGER,
     batlat REAL, batlong REAL, station_id INTEGER)''')
+
+cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+    pressurestart REAL, pressureend REAL,
+    battles_id INTEGER, CONSTRAINT fk_battles FOREIGN KEY (battles_id) REFERENCES Battles (id))''')
 
 # Process barometric lat, long, and readings from CDAIC page and put into Station, Barometer tables
 for line in linelist:
-    r = 0
+    #r = 0
     # extract lat & long from GRID-POINT lines
     if line.find('GRID-POINT') != -1:
         barlat = line[38:42]
@@ -128,7 +139,6 @@ starturl = 'https://en.wikipedia.org/wiki/Military_career_of_Napoleon_Bonaparte'
 html = urllib.request.urlopen(starturl, context=ctx).read().decode()
 soup = BeautifulSoup(html, 'html.parser')
 
-#table = soup.find("table", class_='wikitable sortable')
 table = soup.find('table', {'class':'wikitable sortable'})
 
 for tr in table.find_all('tr'):
@@ -139,12 +149,18 @@ for tr in table.find_all('tr'):
 
     # get battle name title
     try:
-        battle_name = tds[2].find('a')['title']
-        battle_url = 'https://en.wikipedia.org/wiki/' + battle_name
+        battlename = tds[2].find('a')['title']
+        battle_url = 'https://en.wikipedia.org/wiki/' + battlename
     except:
-        battle_url = battle_name
+        battle_url = battlename
     # get battle outcome
     outcome = tds[-1].string.strip()
+    if outcome == 'Victory':
+        outcome = 1
+    elif outcome == 'Defeat':
+        outcome = -1
+    else:
+        outcome = 0
 
     # clean up dates
     end_year = int(battle_date[-4:])
@@ -217,15 +233,15 @@ for tr in table.find_all('tr'):
 
     # Insert data into DB
     cur.execute('''INSERT OR IGNORE INTO Battles (battle_date1, battle_date2,
-                battle_url, outcome) VALUES (?, ?, ?, ?)''',
-                (battle_date1, battle_date2, battle_url, outcome))
+                battle_url, battlename, outcome) VALUES (?, ?, ?, ?, ?)''',
+                (battle_date1, battle_date2, battle_url, battlename, outcome))
     conn.commit()
 
 cur.execute('''SELECT battle_url FROM Battles''')
-battle_names = [item[0] for item in cur.fetchall()]
-print(battle_names)
+battlenames = [item[0] for item in cur.fetchall()]
+print(battlenames)
 
-for battle in battle_names:
+for battle in battlenames:
     try:
         battle_url = battle
         battle = urllib.parse.quote(battle, safe=':/')

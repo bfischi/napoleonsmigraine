@@ -78,8 +78,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Battles
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    pressurestart REAL, pressureend REAL,
-    battles_id INTEGER, CONSTRAINT fk_battles FOREIGN KEY (battles_id) REFERENCES Battles (id))''')
+    pressurestart REAL, pressureend REAL, battles_id INTEGER)''')
 
 # Process barometric lat, long, and readings from CDAIC page and put into Station, Barometer tables
 for line in linelist:
@@ -244,9 +243,7 @@ for battle in battlenames:
         dm_geo = dm_geo.split(";")
         batlat = dm_geo[0].strip()
         batlong = dm_geo[1].strip()
-        # To grab DMS (Degree Minute Second data) data - not needed
-        # batlat = souploc.find(class_='latitude').get_text()
-        # batlong = souploc.find(class_='longitude').get_text()
+
         print('Battle name, latitude, longitude: ', battle, batlat, batlong)
 
         # Insert data into DB

@@ -17,7 +17,10 @@ def dmstodd(dms_string):
     :return: int
     '''
 
-    dd_string = dms_string.strip('N').strip('S').strip('E').strip('W')
+    if 'S' in dms_string or 'W' in dms_string:
+        dd_string = '-' + dms_string.strip().removesuffix('S').removesuffix('W')
+    else:
+        dd_string = dms_string.strip().strip('N').strip('E')
     dd_string = int(dd_string)
     return dd_string
 
@@ -26,8 +29,7 @@ def dmstodd(dms_string):
 url = "https://cdiac.ess-dive.lbl.gov/ftp/ndp025/ndp025.eur"
 print('Retrieving', url)
 
-# open and read the data at the url, store as text file
-# for further processing
+# open and read the data at the url, store as text file for further processing
 page = urllib.request.urlopen(url)
 file = open('barometer.txt', 'w')
 content = str(page.read())
@@ -62,8 +64,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Station
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, year INTEGER,
-    jan REAL, feb REAL, mar REAL, apr REAL, may REAL, jun REAL,
-    jul REAL, aug REAL, sep REAL, oct_m REAL, nov REAL, dec REAL,
+    month INTEGER, reading REAL,
     station_id INTEGER, CONSTRAINT fk_station FOREIGN KEY (station_id) REFERENCES Station (id))''')
 
 # TODO: Battles.station_id might be a confusing name. It is actually the id
@@ -76,13 +77,12 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     batlat REAL, batlong REAL, station_id INTEGER)''')
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
-    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
     pressurestart REAL, pressureend REAL,
     battles_id INTEGER, CONSTRAINT fk_battles FOREIGN KEY (battles_id) REFERENCES Battles (id))''')
 
 # Process barometric lat, long, and readings from CDAIC page and put into Station, Barometer tables
 for line in linelist:
-    #r = 0
     # extract lat & long from GRID-POINT lines
     if line.find('GRID-POINT') != -1:
         barlat = line[38:42]
@@ -90,7 +90,6 @@ for line in linelist:
         # convert lat and long into DD format
         barlat = dmstodd(barlat)
         barlong = dmstodd(barlong)
-        r = 0
         print('Barlat, barlong:', barlat, barlong)
         # commit lat and long to db as integers
         cur.execute('''INSERT OR IGNORE INTO Station (barlat, barlong) VALUES (?, ?)''', (barlat, barlong))
@@ -113,26 +112,19 @@ for line in linelist:
         if newbarlist == []: break
 
         # Assign list items to vars to prepare for insertion into db
-        year = int(newbarlist[0])
-        jan = newbarlist[1]
-        feb = newbarlist[2]
-        mar = newbarlist[3]
-        apr = newbarlist[4]
-        may = newbarlist[5]
-        jun = newbarlist[6]
-        jul = newbarlist[7]
-        aug = newbarlist[8]
-        sep = newbarlist[9]
-        oct_m = newbarlist[10]
-        nov = newbarlist[11]
-        dec = newbarlist[12]
+        for i in range(0, len(newbarlist)):
+            year = int(newbarlist[0])
+            if year > 1815:
+                continue
+            else:
+                month = int(i)
+                reading = newbarlist[i]
 
-        # Insert items from readingslist into the DB
-        cur.execute('''INSERT OR IGNORE INTO Barometer (year, jan, feb, mar,
-                    apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                    (year, jan, feb, mar, apr, may, jun, jul, aug, sep, oct_m, nov, dec, station_id))
-        conn.commit()
+                # Insert items from readingslist into the DB
+                cur.execute('''INSERT OR IGNORE INTO Barometer (year, month, reading, station_id)
+                            VALUES (?, ?, ?, ?)''',
+                            (year, month, reading, station_id))
+                conn.commit()
 
 # Pull Napoleonic battle data from Wikipedia
 starturl = 'https://en.wikipedia.org/wiki/Military_career_of_Napoleon_Bonaparte'
@@ -258,7 +250,7 @@ for battle in battlenames:
         print('Battle name, latitude, longitude: ', battle, batlat, batlong)
 
         # Insert data into DB
-        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?) 
+        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?)
                        WHERE (battle_url) = (?)''', (batlat, batlong, battle_url))
         conn.commit()
     except:
@@ -266,7 +258,7 @@ for battle in battlenames:
         batlat = None
         batlong = None
         # Insert data into DB
-        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?) 
+        cur.execute('''UPDATE Battles SET (batlat, batlong) = (?, ?)
                        WHERE (battle_url) = (?)''', (batlat, batlong, battle_url))
         conn.commit()
         continue

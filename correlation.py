@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime
 
-
 conn = sqlite3.connect('barometer.sqlite')
 cur = conn.cursor()
 
@@ -26,7 +25,7 @@ for datepair in dateslist:
         if previousmonth < 1:
             previousmonth = 12
 
-        #cur.execute(('''SELECT id FROM Battles'''))
+        # cur.execute(('''SELECT id FROM Battles'''))
         cur.execute('''SELECT station_id FROM Battles WHERE battle_date1 = (?)''', (datepair[0],))
         battle_station_id = cur.fetchone()[0]
         print('battlestationid:', battle_station_id)
@@ -83,6 +82,26 @@ for datepair in dateslist:
         print('unhandled use case', datestart.year, dateend.year, datestart.month, dateend.month)
         continue
 
-
 cur.close()
 # TODO: JOIN Battles.id and Correlation.pressurestart and Correlation.pressureend
+
+# NapoleonsMigraine draws on reconstructed barometric pressure data and historical records
+# of Napoleon Bonaparte's battles to see if there is any correlation between pressure
+# changes and his battle outcomes. It is just a fun project with no scientific validity.
+#
+# Copyright (C) 2021 Beth Fischi
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Contact information: Beth Fischi at https://www.linkedin.com/in/bethfischi/.

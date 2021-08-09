@@ -8,6 +8,7 @@ cur.execute('DELETE FROM Barometer WHERE month = 0')
 conn.commit()
 
 cur.execute('''DROP TABLE IF EXISTS Correlation ''')
+cur.execute('''DROP VIEW IF EXISTS v_migraine_data''')
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
@@ -50,6 +51,7 @@ for datetriplet in dateslist:
 
         cur.execute('''INSERT OR IGNORE INTO Correlation (pressurestart, pressureend, battles_id) VALUES (?, ?, ?) ''',
                     (barometerreadstart, barometerreadend, battle_id))
+
         conn.commit()
 
     # update Correlation.readings for case 3, where the battle spanned from one year to another,
@@ -85,6 +87,17 @@ for datetriplet in dateslist:
     else:
         print('unhandled use case', datestart.year, dateend.year, datestart.month, dateend.month)
         continue
+
+cur.execute('''CREATE VIEW v_migraine_data AS
+                                SELECT 
+                                    pressurestart,
+                                    pressureend,
+                                    Battles.battle_date1 AS battle_date,
+                                    Battles.battlename AS battlename,
+                                    Battles.outcome AS outcome
+                                FROM
+                                    Correlation
+                                INNER JOIN Battles ON Battles.id = Correlation.battles_id''')
 
 cur.close()
 

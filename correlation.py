@@ -7,26 +7,30 @@ cur = conn.cursor()
 cur.execute('DELETE FROM Barometer WHERE month = 0')
 conn.commit()
 
-cur.execute('''SELECT battle_date1, battle_date2 FROM Battles''')
+cur.execute('''DROP TABLE IF EXISTS Correlation ''')
+
+cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    pressurestart REAL, pressureend REAL, battles_id INTEGER)''')
+
+cur.execute('''SELECT battle_date1, battle_date2, id FROM Battles''')
 dateslist = cur.fetchall()
 
-for datepair in dateslist:
-    datestart = datetime.strptime(datepair[0], '%Y-%m-%d').date()
-    dateend = datetime.strptime(datepair[1], '%Y-%m-%d').date()
+for datetriplet in dateslist:
+    datestart = datetime.strptime(datetriplet[0], '%Y-%m-%d').date()
+    dateend = datetime.strptime(datetriplet[1], '%Y-%m-%d').date()
+    battle_id = datetriplet[2]  # id of individual battle
+    print(datetriplet)
 
     # update Correlation.readings for cases 1 and 2, where the battle lasted a few days or less within the same month
     if (dateend.year == 1111) or ((datestart.year, datestart.month) == (dateend.year, dateend.month)):
         print('case1 - only one month or day', datestart.year, dateend.year, datestart.month, dateend.month)
-        # calculate the previous year-month
-        # select the station_id for that battle and look up the reading for
-        # the matching station_id + year + month and previous month
-        # store in Correlation.pressurestart, Correlation.pressureend, Correlation.battles_id
         previousmonth = datestart.month - 1
         if previousmonth < 1:
             previousmonth = 12
 
         # cur.execute(('''SELECT id FROM Battles'''))
-        cur.execute('''SELECT station_id FROM Battles WHERE battle_date1 = (?)''', (datepair[0],))
+        cur.execute('''SELECT station_id FROM Battles WHERE battle_date1 = (?)''', (datetriplet[0],))
         battle_station_id = cur.fetchone()[0]
         print('battlestationid:', battle_station_id)
         endmonth = int(datestart.month)
@@ -44,8 +48,8 @@ for datepair in dateslist:
         barometerreadend = cur.fetchone()[0]
         print('barometerreadingend:', barometerreadend)
 
-        cur.execute('''INSERT OR IGNORE INTO Correlation (pressurestart, pressureend) VALUES (?, ?) ''',
-                    (barometerreadstart, barometerreadend))
+        cur.execute('''INSERT OR IGNORE INTO Correlation (pressurestart, pressureend, battles_id) VALUES (?, ?, ?) ''',
+                    (barometerreadstart, barometerreadend, battle_id))
         conn.commit()
 
     # update Correlation.readings for case 3, where the battle spanned from one year to another,
@@ -57,7 +61,7 @@ for datepair in dateslist:
             previousmonth = 12
 
         cur.execute('''SELECT station_id FROM Battles WHERE (battle_date1, battle_date2) = (?, ?)''',
-                    (datepair[0], datepair[1]))
+                    (datetriplet[0], datetriplet[1]))
         battle_station_id = cur.fetchone()[0]
         endmonth = int(dateend.month)
 
@@ -73,9 +77,9 @@ for datepair in dateslist:
         barometerreadend = cur.fetchone()[0]
         print('barometerreadend:', barometerreadend)
 
-        cur.execute('''INSERT OR IGNORE INTO Correlation (pressurestart, pressureend) 
-                    VALUES (?, ?) ''',
-                    (barometerreadstart, barometerreadend))
+        cur.execute('''INSERT OR IGNORE INTO Correlation (pressurestart, pressureend, battles_id) 
+                    VALUES (?, ?, ?) ''',
+                    (barometerreadstart, barometerreadend, battle_id))
         conn.commit()
 
     else:
@@ -83,7 +87,6 @@ for datepair in dateslist:
         continue
 
 cur.close()
-# TODO: JOIN Battles.id and Correlation.pressurestart and Correlation.pressureend
 
 # NapoleonsMigraine draws on reconstructed barometric pressure data and historical records
 # of Napoleon Bonaparte's battles to see if there is any correlation between pressure

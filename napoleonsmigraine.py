@@ -76,9 +76,6 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     battle_date2 TEXT, battle_url TEXT, battlename TEXT, outcome INTEGER,
     batlat REAL, batlong REAL, station_id INTEGER)''')
 
-cur.execute('''CREATE TABLE IF NOT EXISTS Correlation
-    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    pressurestart REAL, pressureend REAL, battles_id INTEGER)''')
 
 # Process barometric lat, long, and readings from CDAIC page and put into Station, Barometer tables
 for line in linelist:

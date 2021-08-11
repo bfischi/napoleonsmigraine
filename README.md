@@ -24,10 +24,10 @@ To run this program, you will need to install the following:
 1. Run visualization2.py
 
 What these files do:
-* napoleonsmigraine.py: Pulls and processes historically reconstructed barometric data from CDAIC site and inserts it into sqlite database called barometer.sqlite. Next, it pulls Napoleonic battle data from Wikipedia, processes it, and stores it in sqlite.
-* haversine.py: Uses the Haversine Formula to find the smallest distance between the battle location (from Wikipedia) and the barometric station (from CDAIC). Stores the closest station to the battle in the Battles table of the database.
-* correlation.py: For each battle, finds the barometric pressure in the month before the battle started and the month the battle ended. Saves the pressurestart and pressureend data in the database and creates a view v_migraine_data of pressure and battle data. 
-* visualization2.py: Creates a lollipop (scatter) plot of the delta pressures between battle start and battle end. The chart shows "defeat" annotations to help the viewer test the hypothesis, "Is it possible that Napoleon's migraines could have contributed to his rare defeats?" Run the program and find out! :)
+* _napoleonsmigraine.py_: Pulls and processes historically reconstructed barometric data from CDAIC site and inserts it into sqlite database called barometer.sqlite. Next, it pulls Napoleonic battle data from Wikipedia, processes it, and stores it in sqlite.
+* _haversine.py_: Uses the Haversine Formula to find the smallest distance between the battle location (from Wikipedia) and the barometric station (from CDAIC). Stores the closest station to the battle in the Battles table of the database.
+* _correlation.py_: For each battle, finds the barometric pressure in the month before the battle started and the month the battle ended. Saves the pressurestart and pressureend data in the database and creates a view v_migraine_data of pressure and battle data. 
+* _visualization2.py_: Creates a lollipop (scatter) plot of the delta pressures between battle start and battle end. The chart shows "defeat" annotations to help the viewer test the hypothesis, "Is it possible that Napoleon's migraines could have contributed to his rare defeats?" Run the program and find out! :)
 
 ## <a name="Caveats"></a>Caveats
 As mentioned, this is just a fun project with no scientific validity. Here are some of the ways the methodology is, shall we say, questionable:

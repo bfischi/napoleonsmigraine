@@ -5,6 +5,8 @@ It's said that the French statesman and military leader Napoleon Bonaparte (1769
 
 This program asks the question: What if Napoleon suffered from barometric pressure migraines - that is, migraines that are triggered with barometric pressure changes? Is it possible that such migraines could have contributed to his rare defeats? On this basis, the program compares Napoleon's battle outcomes with barometric pressure changes in the battle region at the time of the battle to see if his losses might be correlated with migraine weather. 
 
+If you run these files, you end up producing a chart of Napoleonic battle dates vs. pressure deltas between the start/end date of each battle. The chart is annotated with the rare battles in which Napoleon was defeated (yes, of course Waterloo, plus 4 others!). Typically, a decrease in barometric pressure will cause head pain. If there were a strong correlation between barometric pressure drops and battle dates, we might be onto something.
+
 This program was intended as a fun Python learning project for me, and it's [rapturously unscientific](#Caveats).
 
 ## Prerequisites
@@ -27,7 +29,7 @@ What these files do:
 * _napoleonsmigraine.py_: Pulls and processes historically reconstructed barometric data from CDAIC site and inserts it into sqlite database called barometer.sqlite. Next, it pulls Napoleonic battle data from Wikipedia, processes it, and stores it in sqlite.
 * _haversine.py_: Uses the Haversine Formula to find the smallest distance between the battle location (from Wikipedia) and the barometric station (from CDAIC). Stores the closest station to the battle in the Battles table of the database.
 * _correlation.py_: For each battle, finds the barometric pressure in the month before the battle started and the month the battle ended. Saves the pressurestart and pressureend data in the database and creates a view v_migraine_data of pressure and battle data. 
-* _visualization2.py_: Creates a lollipop (scatter) plot of the delta pressures between battle start and battle end. The chart shows "defeat" annotations to help the viewer test the hypothesis, "Is it possible that Napoleon's migraines could have contributed to his rare defeats?" Run the program and find out! :)
+* _visualization2.py_: Creates a lollipop (scatter) plot of the delta of pressures between battle start and battle end. The chart shows "defeat" annotations to help the viewer test the hypothesis, "Is it possible that Napoleon's migraines could have contributed to his rare defeats?" Run the program and find out! :)
 
 ## <a name="Caveats"></a>Caveats
 As mentioned, this is just a fun project with no scientific validity. Here are some of the ways the methodology is, shall we say, questionable:

@@ -46,8 +46,7 @@ Jones P D ; Wigley T M L ; Briffa K R (2018): Monthly Mean Pressure Reconstructi
 En.wikipedia.org. 2021. Military career of Napoleon Bonaparte - Wikipedia. [online] Available at: <https://en.wikipedia.org/wiki/Military_career_of_Napoleon_Bonaparte#Battle_record_summary> [Accessed 11 August 2021].
 
 ## Other Reading
-
-[Influence of Barometric Pressure in Patients with Migraine Headache](https://www.jstage.jst.go.jp/article/internalmedicine/50/18/50_18_1923/_pdf)
-[Japanese researchers find correlation between changes in atmospheric pressure and migraines](https://techsensitive.com/japanese-researchers-find-correlation-between-changes-in-atmospheric-pressure-and-migraines/)
-[Understanding Barometric Pressure Headaches: How Does Weather Affect Your Headaches?](https://www.healthline.com/health/headache/barometric-pressure-headache)
-[Weather and Migraine](https://americanmigrainefoundation.org/resource-library/weather-and-migraine/)
+* [Influence of Barometric Pressure in Patients with Migraine Headache](https://www.jstage.jst.go.jp/article/internalmedicine/50/18/50_18_1923/_pdf)
+* [Japanese researchers find correlation between changes in atmospheric pressure and migraines](https://techsensitive.com/japanese-researchers-find-correlation-between-changes-in-atmospheric-pressure-and-migraines/)
+* [Understanding Barometric Pressure Headaches: How Does Weather Affect Your Headaches?](https://www.healthline.com/health/headache/barometric-pressure-headache)
+* [Weather and Migraine](https://americanmigrainefoundation.org/resource-library/weather-and-migraine/)

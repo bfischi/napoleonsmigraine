@@ -6,7 +6,7 @@ import datetime as dt
 
 
 def dmstodd(dms_string):
-    '''
+    """
     Returns an integer converted from Degree Minutes Seconds (DMS) format to Decimal Degrees (DD).
     DD is the format used in geolocation calculations and haversine.py.
     Important: This simple formula is specific to the purpose used in this program only. It is not for
@@ -15,7 +15,7 @@ def dmstodd(dms_string):
 
     :param dms_string: a string in DMS format  similar to "degrees(N/S/E/W)" - for example: 70N or 20W
     :return: int
-    '''
+    """
 
     if 'S' in dms_string or 'W' in dms_string:
         dd_string = '-' + dms_string.strip().removesuffix('S').removesuffix('W')
@@ -279,3 +279,8 @@ cur.close()
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # Contact information: Beth Fischi at https://www.linkedin.com/in/bethfischi/.
+
+# Barometric pressure data credited to: Jones P D ; Wigley T M L ; Briffa K R (2018): Monthly Mean Pressure
+# Reconstructions for Europe (1780-1980) and North America (1858-1980) (1987) (NDP-025). Carbon Dioxide Information
+# Analysis Center (CDIAC), Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States).
+# doi:10.3334/CDIAC/CLI.NDP025

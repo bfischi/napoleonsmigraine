@@ -10,7 +10,7 @@ If you run these files, you end up producing a chart of Napoleonic battle dates 
 This program was intended as a fun Python learning project for me, and it's [rapturously unscientific](#Caveats).
 
 ## Prerequisites
-To run this program, you will need to install the following:
+Before running this program, install the following using the provider's documentation:
 * Python 3 (testing was done on Python 3.9.5)
 * sqlite3
 * ssl
@@ -20,10 +20,11 @@ To run this program, you will need to install the following:
 * pandas
 
 ## To run Napoleon's Migraine
-1. Run napoleonsmigraine.py
-1. Run haversine.py
-1. Run correlation.py
-1. Run visualization2.py
+Run the files in this order:
+1. napoleonsmigraine.py
+1. haversine.py
+1. correlation.py
+1. visualization2.py
 
 What these files do:
 * _napoleonsmigraine.py_: Pulls and processes historically reconstructed barometric data from CDAIC site and inserts it into sqlite database called barometer.sqlite. Next, it pulls Napoleonic battle data from Wikipedia, processes it, and stores it in sqlite.

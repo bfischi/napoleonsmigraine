@@ -5,7 +5,7 @@ It's said that the French statesman and military leader Napoleon Bonaparte (1769
 
 This program asks the question: What if Napoleon suffered from barometric pressure migraines - that is, migraines that are triggered with barometric pressure changes? Is it possible that such migraines could have contributed to his rare defeats? On this basis, the program compares Napoleon's battle outcomes with barometric pressure changes in the battle region at the time of the battle to see if his losses might be correlated with migraine weather. 
 
-If you run these files, you end up producing a chart of Napoleonic battle dates vs. pressure deltas between the start/end date of each battle. The chart is annotated with the rare battles in which Napoleon was defeated (yes, of course Waterloo, plus 4 others!). Typically, a decrease in barometric pressure will cause head pain. If there were a strong correlation between barometric pressure drops and battle dates, we might be onto something.
+If you run these files, you end up producing a chart of Napoleonic battle dates vs. pressure deltas between the start/end date of each battle. The chart is annotated with the rare battles in which Napoleon was defeated (yes, including Waterloo! :). Typically, a decrease in barometric pressure will cause head pain. If there were a strong correlation between barometric pressure drops and battle dates, we might be onto something.
 
 This program was intended as a fun Python learning project for me, and it's [rapturously unscientific](#Caveats).
 

@@ -5,12 +5,12 @@ It's said that the French statesman and military leader Napoleon Bonaparte (1769
 
 This program asks the question: What if Napoleon suffered from barometric pressure migraines - that is, migraines that are triggered with barometric pressure changes? Is it possible that such migraines could have contributed to his rare defeats? On this basis, the program compares Napoleon's battle outcomes with barometric pressure changes in the battle region at the time of the battle to see if his losses might be correlated with migraine weather. 
 
-If you run these files, you end up producing a chart of Napoleonic battle dates vs. pressure deltas between the start/end date of each battle. The chart is annotated with the rare battles in which Napoleon was defeated (yes, of course Waterloo, plus 4 others!). Typically, a decrease in barometric pressure will cause head pain. If there were a strong correlation between barometric pressure drops and battle dates, we might be onto something.
+If you run these files, you end up producing a chart of Napoleonic battle dates vs. pressure deltas between the start/end date of each battle. The chart is annotated with the rare battles in which Napoleon was defeated (yes, including Waterloo! :). Typically, a decrease in barometric pressure will cause head pain. If there were a strong correlation between barometric pressure drops and battle dates, we might be onto something.
 
 This program was intended as a fun Python learning project for me, and it's [rapturously unscientific](#Caveats).
 
 ## Prerequisites
-To run this program, you will need to install the following:
+Before running this program, install the following using the provider's documentation:
 * Python 3 (testing was done on Python 3.9.5)
 * sqlite3
 * ssl
@@ -20,10 +20,11 @@ To run this program, you will need to install the following:
 * pandas
 
 ## To run Napoleon's Migraine
-1. Run napoleonsmigraine.py
-1. Run haversine.py
-1. Run correlation.py
-1. Run visualization2.py
+Run the files in this order:
+1. napoleonsmigraine.py
+1. haversine.py
+1. correlation.py
+1. visualization2.py
 
 What these files do:
 * _napoleonsmigraine.py_: Pulls and processes historically reconstructed barometric data from CDAIC site and inserts it into sqlite database called barometer.sqlite. Next, it pulls Napoleonic battle data from Wikipedia, processes it, and stores it in sqlite.

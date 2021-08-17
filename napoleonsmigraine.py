@@ -67,10 +67,6 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Barometer
     month INTEGER, reading REAL,
     station_id INTEGER, CONSTRAINT fk_station FOREIGN KEY (station_id) REFERENCES Station (id))''')
 
-# TODO: Battles.station_id might be a confusing name. It is actually the id
-# TODO: of the closest barometric station to the Battle, not the Station.id itself.
-# TODO: But how to change?
-
 cur.execute('''CREATE TABLE IF NOT EXISTS Battles
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, battle_date1 TEXT,
     battle_date2 TEXT, battle_url TEXT, battlename TEXT, outcome INTEGER,

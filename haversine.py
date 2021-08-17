@@ -59,7 +59,7 @@ for battle in battle_loc:
         id = loc[2]
         # handle Nulls in list
         if not haversine(batlat, batlong, barlat, barlong):
-            distance = None  # TODO: Is setting this to none gonna cause issues when looking for lowest distance
+            distance = None
             continue
         else:
             distance = haversine(batlat, batlong, barlat, barlong)
@@ -79,7 +79,6 @@ for battle in battle_loc:
 print('Kilometers:', barlocs, len(barlocs))
 
 # Remove rows where there's no battle data
-# TODO: Should this be done sooner, in napoleonsmigraine.py?
 cur.execute('DELETE FROM Battles WHERE station_id = -1')
 conn.commit()
 

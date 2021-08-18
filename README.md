@@ -10,14 +10,14 @@ If you run these files, you end up producing a chart of Napoleonic battle dates 
 This program was intended as a fun Python learning project for me, and it's [rapturously unscientific](#Caveats).
 
 ## Prerequisites
-Before running this program, install the following using the provider's documentation:
-* Python 3 (testing was done on Python 3.9.5)
-* sqlite3
-* ssl
-* bs4 (BeautifulSoup)
-* matplotlib
-* numpy
-* pandas
+Before running this program, install the following packages using the provider's documentation. Versions listed were the ones the program was tested on.
+* Python 3 (testing was done on Python 3.9.5), which includes:
+  * sqlite3
+  * ssl
+* bs4 (BeautifulSoup 4.9.3)
+* matplotlib 3.4.2
+* numpy 1.20.3
+* pandas 1.2.4
 
 ## To run Napoleon's Migraine
 Run the files in this order:
